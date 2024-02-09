@@ -1,5 +1,5 @@
-SET @m_startDate :=  '20240101 0000';
-SET @m_endDate :=  '20240102 0000';
+SET @m_startDate :=  '20240201 0000';
+SET @m_endDate :=  '20240209 0000';
 
 
 SELECT id AS operationID, 
@@ -21,6 +21,7 @@ SELECT id AS operationID,
 			 WHEN  22 THEN 'VISA Nacional'
 			 WHEN  23 THEN 'AMEX'
 			 WHEN  27 THEN 'Mastercard Nacional'
+			 WHEN  29 THEN 'Book to Book Received'
 			 WHEN  56 THEN 'Vales'
 			 WHEN  57 THEN 'internacional'
 			 WHEN 104 THEN 'Deposito en Efectivo'
@@ -49,13 +50,21 @@ SELECT id AS operationID,
 		 MONTH(created_at) AS MONTH,
 		 DAY(created_at) AS DAY,
 		 HOUR(created_at) AS HOUR,
-       description, 
+       REPLACE(description, ',', ' ') AS Description, 
 		 IFNULL(originalUsername, 'Not Provided') AS merchantName, 
 		 IFNULL(originalEmail, 'Not Provited') AS merchantEmail,
 		 IFNULL(observation, 'userEmail') AS userEmail 		 
   FROM Operation 
  WHERE DATE_SUB(created_at, INTERVAL 6 HOUR) BETWEEN STR_TO_DATE(@m_startDate, '%Y%m%d %H%i')
                                                  AND STR_TO_DATE(@m_endDate, '%Y%m%d %H%i')
-   AND TYPE IN (1, 3, 4, 10, 11, 12, 13, 22, 23, 27, 56, 57, 104, 105, 106, 107, 108, 109, 110)  
+   AND TYPE IN (1, 3, 4, 10, 11, 12, 13, 22, 23, 27, 29, 56, 57, 104, 105, 106, 107, 108, 109, 110)  
    AND STATUS IN (31) 
  ORDER BY created_at ASC ;
+ 
+ 
+ SELECT COUNT(*) AS counter, SUM(amount) AS amount 
+  FROM Operation 
+ WHERE DATE_SUB(created_at, INTERVAL 6 HOUR) BETWEEN STR_TO_DATE(@m_startDate, '%Y%m%d %H%i')
+                                                 AND STR_TO_DATE(@m_endDate, '%Y%m%d %H%i')
+   AND TYPE IN (1, 3, 4, 10, 11, 12, 13, 22, 23, 27, 29, 56, 57, 104, 105, 106, 107, 108, 109, 110)  
+   AND STATUS IN (31) ;
